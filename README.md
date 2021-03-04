@@ -18,12 +18,15 @@ A program written in C++ to calculate the final mark of students using the formu
 
  1. Download a [release](https://github.com/hmv47/GradeCalculator/releases)
  2. Get a C++ compile (e.g. [GCC](https://gcc.gnu.org/)) or use an IDE such as CodeBlocks or Visual Studio
- 3. Choose either array.cpp or vector.cpp and compile it (the only difference is the datatype used to store homework grades)
- 4. Compile the program (e.g. if using gcc and compilng array.cpp the command is "g++ array array.cpp")
- 5. Run the file in the terminal using ./array (or array.exe if using Windows)
+ 3. Run make to compile the entire program. Prepare "kursiokai.txt" if you want to read data
+ 4. You can run make clean to delete previous build
+ 5. Run the file in the terminal using ./vector (or vector.exe if using Windows)
  6. Follow on screen instructions
 
 ## Versions:
 
  0.1 Initial version
+ 
  0.2 Added the ability to read data from files. From now on, only Vector version is developed.
+ 
+ 0.3 Added exception handling and makefiles
