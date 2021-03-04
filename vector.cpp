@@ -139,7 +139,7 @@ int main () {
     ValidateChoice(FilGenMan, 'f', 'g', 'm');
 
     std::cout << "\nPlease choose the calculation method:\n";
-    std::cout << "\nMedian:\t\tm\nAverage:\tv\n";
+    std::cout << "\nMedian:\t\tm\nAverage:\ta\n";
     std::cin >> AvgManChoice;                      // Read result type
     ValidateChoice(AvgManChoice, 'm', 'a');
 
