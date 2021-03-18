@@ -1,16 +1,19 @@
 #pragma once // Include  guard
 
-#include <vector> // Vector lib
-#include "structure.h" // Include the structure type
+#include <vector>
+#include "structure.h"
 
 template <typename T>
-void RepeatInput(T&); // Repeat input in case of fail
-void FileInput (std::vector<StudentStructure>&); // File reading
-double GradeAverage (int*, int); // Calculating avg
-double GradeMedian (int*, int); // Calculating median
-double Result (StudentStructure*, char); // Calculating final result
-void ValidateChoice (char&, char, char); // Validating choice (2)
-void ValidateChoice (char&, char, char, char); // Validating choice (3)
-void ValidateNumber (int&, int, int); // Validating number
-void generateGrades (StudentStructure*); // Generating grades
-void FileOutput(std::vector<StudentStructure>&, char); // Writing file
+void RepeatInput(T&);
+void FileRead (std::vector<StudentStructure>&, std::string);
+double GradeAverage (int*, int);
+double GradeMedian (int*, int);
+double Result (StudentStructure*, char);
+void GroupStudents (std::vector<StudentStructure>&, std::vector<StudentStructure>&);
+void ValidateOption (char&, char, char);
+void ValidateOption (char&, char, char, char);
+void ValidateNumber (int&, int, int);
+void GradesGenerate (StudentStructure*);
+void GenerateFile (int);
+void SortStudents (std::vector<StudentStructure>&, std::vector<StudentStructure>&, char);
+void WriteFile(std::vector<StudentStructure>&, char, std::string);

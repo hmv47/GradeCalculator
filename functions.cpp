@@ -1,62 +1,80 @@
-#include <iostream> // IO library
-#include <iomanip> // IO manipulation library
-#include <fstream> // File read / write
-#include <sstream> // Used to read string
-#include <algorithm> // Used to sort vector
-#include <random> // Library, used to generate random numbers
+#include <iomanip> // IO manipulation
+#include <iostream> // Screen lib
+#include <fstream> // File lib
+#include <sstream> // String stream
+#include <algorithm> // Used for sort
+#include <random> // Random number generation
+#include <chrono> // RND and timer
 
-#include "functions.h" // Functions header
+#include "functions.h" // Functions lib
 
-void FileInput (std::vector<StudentStructure> &IndividualVector) {
-    std::ifstream FRead ("kursiokai.txt");     // Open the file
-    int HomeworkAmount = 0;
+void FileRead (std::vector<StudentStructure> &BadStudents, std::string FileName) {
+    std::ifstream FRead (FileName);
 
-    std::string FLine;
-    std::getline(FRead, FLine);            // Read the first line of the file
-    std::stringstream ss1 (FLine);       // Copy into stringstream
-    std::string str1;
-    while (ss1 >> str1)                       // Count the number of separate strings
-        HomeworkAmount ++;
-    HomeworkAmount -= 3;                           // Ignore FirstName, LastName and ExamGrade strings
+    int HWAmount = 0;
+    std::string header;
+    std::getline(FRead, header); // Read first line
+    std::stringstream firstRow (header);  // Copy into string stream
+    std::string str;
+    while (firstRow >> str) // Count the number of separate strings
+        HWAmount ++;
+    HWAmount -= 3;  // Ignore first three strings
 
-    StudentStructure VectorStore; // Initialize temporary vector
-    int HWStore;
-    do {                                    // Read one students data into structure
-        FRead >> VectorStore.FirstName >> VectorStore.LastName;
-        VectorStore.HomeworkVector.clear();                    // Empty the temporary homework vector and fill it with grades from the file
-        for (int i = 0; i < HomeworkAmount; i ++) {
-            FRead >> HWStore;
-            VectorStore.HomeworkVector.push_back(HWStore);
+    StudentStructure TempVector;
+    TempVector.HW.reserve(HWAmount);
+
+    int CurrHW;
+    std::string row;
+    std::stringstream DataRow;
+    while (std::getline(FRead, row)) {   // Continue reading until EOF
+        DataRow.str(row);
+        DataRow >> TempVector.FirstName >> TempVector.LastName;
+        TempVector.HW.clear();                    // Clear temporary vector
+        for (int i = 0; i < HWAmount; i ++) {
+            DataRow >> CurrHW;
+            TempVector.HW.push_back(CurrHW);
         }
-        FRead >> VectorStore.ExamGrade;
-        IndividualVector.push_back(VectorStore);                  // Push the temporary structure to the vector of structures
-    } while (!FRead.eof());                    // Continue reading until the end of file is reached
-	FRead.close();                             // Close the file
+        DataRow >> TempVector.ExamGrade;
+        BadStudents.push_back(TempVector); // Push structure
+    }
+	FRead.close();
 }
 
-
-// Calculate average grade
-double GradeAverage (int* HomeworkVector, int n) {
+double GradeAverage (int* HW, int n) {
     double sum = 0;
     for (int i = 0; i < n; i ++)
-        sum += HomeworkVector[i];
+        sum += HW[i];
     return (sum / n);
 }
 
-// Calculate median grade
-double GradeMedian (int *HomeworkVector, int n) {
+double GradeMedian (int *HW, int n) {
     double m;
-    std::sort(HomeworkVector, HomeworkVector + n);
-    n % 2 == 0 ? (m = 1.00 * (HomeworkVector[n / 2 - 1] + HomeworkVector[n / 2]) / 2) : m = HomeworkVector[n / 2];
+    std::sort(HW, HW + n);
+    n % 2 == 0 ? (m = 1.00 * (HW[n / 2 - 1] + HW[n / 2]) / 2) : m = HW[n / 2];
     return m;
 }
 
-double Result (StudentStructure* IndividualVector, char type){
-    double HomeworkGrade;
-    if (!IndividualVector->HomeworkVector.empty())  // Test that the vector isn't empty
-        type == 'm' ? HomeworkGrade = GradeMedian(&IndividualVector->HomeworkVector[0], IndividualVector->HomeworkVector.size()) : HomeworkGrade = GradeAverage(&IndividualVector->HomeworkVector[0], IndividualVector->HomeworkVector.size());
-    else HomeworkGrade = 0;
-    return (0.4 * HomeworkGrade + 0.6 * IndividualVector->ExamGrade);
+double Result (StudentStructure* BadStudents, char type){
+    double hw;
+    if (!BadStudents->HW.empty())  // Test that the vector is not empty
+        type == 'm' ? hw = GradeMedian(&BadStudents->HW[0], BadStudents->HW.size()) : hw = GradeAverage(&BadStudents->HW[0], BadStudents->HW.size());
+    else hw = 0;
+    return (0.4 * hw + 0.6 * BadStudents->ExamGrade);
+}
+
+void GroupStudents (std::vector<StudentStructure> &BadStudents, std::vector<StudentStructure> &GoodStudents) {
+    // Sort students by their final grades
+    std::sort(BadStudents.begin(), BadStudents.end(), [](StudentStructure &s1, StudentStructure &s2) {return s1.FinalGrade < s2.FinalGrade;});
+
+    int BadStudentsAmount = 0;
+    while (BadStudents[BadStudentsAmount].FinalGrade < 5.0)     // Get students with grade > 5
+        BadStudentsAmount ++;
+
+    GoodStudents.reserve(BadStudents.size() - BadStudentsAmount);    // Set capacity
+    std::copy(BadStudents.begin() + BadStudentsAmount, BadStudents.end(), std::back_inserter(GoodStudents)); // Copy good students
+
+    BadStudents.resize(BadStudentsAmount);                 // Resize shrink bad students
+    BadStudents.shrink_to_fit();                          // Shrink
 }
 
 template <typename T>
@@ -66,62 +84,111 @@ void RepeatInput(T& input) {
     std::cin >> input;
 }
 
-// Test input (2)
-void ValidateChoice (char& input, char option1, char option2) {
+// 2 parameter test
+void ValidateOption (char& input, char option1, char option2) {
     while (!(input == option1 || input == option2)) {
-        std::cout << "Error. You can choose (" << option1 << "/" << option2 << ") \n";
+        std::cout << "Error. Please choose (" << option1 << "/" << option2 << ") \n";
         RepeatInput(input);
     }
 }
 
-// Test input (3)
-void ValidateChoice (char& input, char option1, char option2, char option3) {
+// 3 parameter test
+void ValidateOption (char& input, char option1, char option2, char option3) {
     while (!(input == option1 || input == option2 || input == option3)) {
-        std::cout << "Error. You can choose (" << option1 << "/" << option2  << "/" << option3 << ") \n";
+        std::cout << "Error. Please choose (" << option1 << "/" << option2  << "/" << option3 << ") \n";
         RepeatInput(input);
     }
 }
 
-// Test numbers
+// Test if entered a number
 void ValidateNumber (int& input, int lowest, int highest) {
     while (input < lowest || input > highest || std::cin.fail()) {
-        std::cout << "Error. You can choose [" << lowest << " ; " << highest << "] \n";
+        std::cout << "Error. Please choose [" << lowest << " ; " << highest << "] \n";
         RepeatInput(input);
     }
 }
 
-void generateGrades (StudentStructure* IndividualVector) {
-    char MoreGrades;
-    std::random_device rd; // Obtain a random number from hardware
-    std::mt19937 gen(rd()); // Seed the generator
-    std::uniform_int_distribution<> distr(1, 10); // Define the range
+void GradesGenerate (StudentStructure* BadStudents) {
+    using hrClock = std::chrono::high_resolution_clock;
+    std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count())); // Random number generator
+    std::uniform_int_distribution<int> random10(1, 10);
 
+    char MoreGrades;
+    std::cout << "\nGenerating grades.\n\n";
     do {
-        IndividualVector->HomeworkVector.push_back(distr(gen)); // Generate random grade
-        std::cout << "\nGenerated grade: " << IndividualVector->HomeworkVector.back() << "\nGenerate another? (y/n) ";
+        BadStudents->HW.push_back(random10(mt));                      // Generate random grade
+        std::cout << "Grade: " << BadStudents->HW.back() << "\nGenerate another ? (y/n)";
         std::cin >> MoreGrades;
-        ValidateChoice(MoreGrades, 'y', 'n');
+        ValidateOption(MoreGrades, 'y', 'n');
     } while (MoreGrades == 'y');
 
-    IndividualVector->ExamGrade = distr(gen);  // Generate a random exam grade
-    std::cout << "\n\nGenerated exam grade: " << IndividualVector->ExamGrade << "\n";
+    BadStudents->ExamGrade = random10(mt);                                 // Random exam grade
+    std::cout << "Generated exam grade: " << BadStudents->ExamGrade << "\n";
 }
 
-void FileOutput(std::vector<StudentStructure> &IndividualVector, char AvgManChoice) {
-    std::ofstream FWrite ("rezultatai.txt"); // Open results file
+void GenerateFile (int numOfStudents) {
+    using hrClock = std::chrono::high_resolution_clock;
+    std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count())); // Random number generator
+    std::uniform_int_distribution<int> random10(1, 10);
+    std::uniform_int_distribution<int> random20(1, 20);
+    int HWAmount = random20(mt);                     // Generate the amount of grades
 
-    FWrite << std::setw(20) << std::left << "First name" << std::setw(20) << "Last name" << "Final grade ";        // Header
-    AvgManChoice == 'm' ? FWrite << "(Med.)\n" : FWrite << "(Avg.)\n";
-    FWrite << "--------------------------------------------------------\n";
-    for (int i = 0; i < IndividualVector.size(); i ++)                 // Print out student's data
-        FWrite << std::setw(20) << std::left << IndividualVector[i].FirstName << std::setw(20) << IndividualVector[i].LastName << std::fixed << std::setprecision(2) << IndividualVector[i].TotalResult << "\n";
+    std::ostringstream FileName;
+    FileName << "kursiokai" << numOfStudents << ".txt"; // Create data file name
+    std::ofstream add (FileName.str());                 // Open data file
 
-    try {
-        if (FWrite.good())                                  // Print message if OK
-           std::cout << "\n\nThe results were written to file rezultatai.txt\n\n"; // message if OK
-        else throw FWrite.rdstate();                        // Set error state flag as an exception code
-    } catch (int code) { // catch the exception
-        std::cout << "Error: " << code << "\n"; // Error code
+    // Print header text
+    std::ostringstream row ("");
+    row << std::setw(20) << std::left << "Vardas" << std::setw(21) << "Pavarde";
+
+    for (int i = 1; i <= HWAmount; i ++)
+        row << "ND" << std::setw(8) << std::left << i;
+    row << "Egz.\n";
+    add << row.str();
+
+    // Print student data text
+    int Last = 0, grade;
+    for (int i = 1; i <= numOfStudents; i ++) {
+        row.str("");
+        row << "Vardas" << std::setw(14) << std::left << i << "Pavarde" << std::setw(14) << std::left << i;
+        for (int j = 0; j <= HWAmount; j ++) {
+            grade = random10(mt);
+            row << std::setw(10) << std::left << grade; // Generate exam grade
+            Last = grade;
+        }
+        row << "\n";
+        add << row.str();
     }
-    FWrite.close();                                         // Close the results' file
+    add.close();
+}
+
+void SortStudents (std::vector<StudentStructure> &BadStudents, std::vector<StudentStructure> &GoodStudents, char SortChoice) {
+    if (SortChoice == 'n') {
+        std::sort(BadStudents.begin(), BadStudents.end(), [](StudentStructure &s1, StudentStructure &s2) {return s1.FirstName < s2.FirstName;});
+        std::sort(GoodStudents.begin(), GoodStudents.end(), [](StudentStructure &s1, StudentStructure &s2) {return s1.FirstName < s2.FirstName;});
+    } else if (SortChoice == 'l') {
+        std::sort(BadStudents.begin(), BadStudents.end(), [](StudentStructure &s1, StudentStructure &s2) {return s1.LastName < s2.LastName;});
+        std::sort(GoodStudents.begin(), GoodStudents.end(), [](StudentStructure &s1, StudentStructure &s2) {return s1.LastName < s2.LastName;});
+    }
+}
+
+void WriteFile(std::vector<StudentStructure> &BadStudents, char FinalChoice, std::string FileName) {
+    std::ofstream FWrite (FileName);                // Open the results file
+    std::ostringstream row ("");                // Create empty row stringstream
+
+    // Print header
+    row << std::setw(20) << std::left << "First name" << std::setw(20) << "Last name" << "Final grade ";
+    FWrite << row.str();
+
+    FinalChoice == 'm' ? FWrite << "(Med.)\n" : FWrite << "(Avg.)\n";
+    FWrite << "--------------------------------------------------------\n";
+
+    // Print students' data
+    for (int i = 0; i < BadStudents.size(); i ++) {
+        row.str("");        // Empty the row stream and add single student's data
+        row << std::setw(20) << std::left << BadStudents[i].FirstName << std::setw(20) << BadStudents[i].LastName
+            << std::fixed << std::setprecision(2) << BadStudents[i].FinalGrade << "\n";
+        FWrite << row.str();    // Print the completed row
+    }
+    FWrite.close();             // Close the results' file
 }
