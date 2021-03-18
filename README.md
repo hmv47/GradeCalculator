@@ -7,9 +7,13 @@ A program written in C++ to calculate the final mark of students using the formu
 ## Speed analysis
 
 Testbed specs:  AMD EPYC 7502P 32C 64T @ 2.5 GHz; 512 GB DDR4 ECC; 480 GB NVMe SSD 3D XPoint in RAID 10
+
 Homework amount: 10
+
 Calculation method: Average
+
 Sorting type: Final mark
+
 
 | HW amount | Generating | Reading | Grouping | Good output | Bad output | File size |
 |--|--|--|--|--|--|--|
