@@ -2,10 +2,9 @@
 
 #include <vector>
 
-struct StudentStructure { // Student structure
-    std::string FirstName, LastName; // Name
+struct StudentStructure {
+    std::string FirstName, LastName;
     int ExamGrade;
-    double TotalResult;
-    std::vector<int> HomeworkVector; // Vector of grades
+    double FinalGrade;
+    std::vector<int> HW; // Vector of homework grades
 };
-
