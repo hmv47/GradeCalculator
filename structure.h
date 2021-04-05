@@ -1,10 +1,9 @@
-#pragma once // Include  guard
+// Structure
 
-#include <vector>
+#pragma once
 
-struct StudentStructure {
+struct Students {
     std::string FirstName, LastName;
-    int ExamGrade;
     double FinalGrade;
-    std::vector<int> HW; // Vector of homework grades
 };
+
