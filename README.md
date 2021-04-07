@@ -48,8 +48,11 @@ The most effective for data sorting is **vector**, **deque** is slower and **lis
  1. Download a [release](https://github.com/hmv47/GradeCalculator/releases)
  2. Get a C++ compiler (e.g. [GCC](https://gcc.gnu.org/)) or use an IDE such as CodeBlocks or Visual Studio
  3. Run make to compile the entire program. Prepare "kursiokai.txt" if you want to read data
+ 
     4a. You can run make clean to delete previous build
+    
     4b. You can run make clean-all to clean all files including data files
+    
  5. Run the file in the terminal using ./runtime (or runtime.exe if using Windows)
  6. Follow on screen instructions
 
