@@ -48,7 +48,7 @@ void GradesGenerateFile (int StudNumber) {
 
     // Print header text
     std::ostringstream row ("");        // Empty row to be filled in with header data
-    row << std::setw(20) << std::left << "First name" << std::setw(21) << "Last name";
+    row << std::setw(20) << std::left << "FirstName" << std::setw(21) << "LastName";
     for (int i = 1; i <= HWNumber; i ++)
         row << "HW" << std::setw(8) << std::left << i;
     row << "Ex.\n";
@@ -57,7 +57,7 @@ void GradesGenerateFile (int StudNumber) {
     // Print student data
     for (int i = 1; i <= StudNumber; i ++) {
         row.str("");                    // Clear and fill
-        row << "Vardas" << std::setw(14) << std::left << i << "Pavarde" << std::setw(14) << std::left << i;
+        row << "FirstName" << std::setw(14) << std::left << i << "LastName" << std::setw(14) << std::left << i;
         for (int j = 0; j <= HWNumber; j ++)
             row << std::setw(10) << std::left << random10(mt);
         row << "\n";

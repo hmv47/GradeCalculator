@@ -7,34 +7,30 @@ A program written in C++ to calculate the final mark of students using the formu
 ## Speed analysis:
 
 Testbed specs:  AMD EPYC 7502P 32C 64T @ 2.5 GHz; 512 GB DDR4 ECC; 480 GB NVMe SSD 3D XPoint in RAID 10
-
 Homework amount: 10
-
 Calculation method: Average
-
 Sorting type: Final mark
-
 
 **Data read:**
 
 | HW amount | vector | deque | list |
 |--|--|--|--|
-| 1000 | 0.00184915 sec. | 0.0026162 sec. | 0.00419076 sec. |
-| 10000 | 0.174586 sec | 0.145858s | 0.159842 sec. |
-| 100000 | 1.70992 sec  | 1.4789 sec | 1.1710 sec. |
-| 1000000 | 6.4789 sec. | 8.2478 sec. | 12.4782 sec. |
-| 10000000 | 9.4859 sec. | 13.5378 sec. | 21.4353 sec. |
+| 1000 | 0.00121062 sec. | 0.00810994 sec. | 0.00295512 sec. |
+| 10000 | 0.0111675 sec. | 0.0147009 sec. | 0.0239978 sec. |
+| 100000 | 0.101438 sec.  | 0.135723 sec. | 0.213205 sec. |
+| 1000000 | 0.989572 sec. |1.28598 sec. | 2.05806 sec. |
+| 10000000 | 9.85548 sec. | 12.5431 sec. | 20.796 sec. |
 
 The most effective for data read is **vector**, **deque** is slower and **list** is the slowest
 
 **Data sorting:**
 | HW amount | vector | deque | list |
 |--|--|--|--|
-| 1000 | 0.000680192 sec. | 0.0012453 sec. | 0.00115116 sec. |
-| 10000 | 0.035579 sec. | 0.041785 sec. | 0.042606 sec. |
-| 100000 | 0.474306 sec.  | 0.536518 sec. | 0.688719 sec. |
-| 1000000 | 6.92151 sec. | 6.92584 sec. | 7.06539 sec. |
-| 10000000 | 8.35139 sec. | 14.7464 sec. | 15.3681 sec. |
+| 1000 | 0.000421655 sec. | 0.00260031 sec. | 0.000923334 sec. |
+| 10000 | 0.00454617 sec. | 0.0073013 sec. | 0.0083996 sec. |
+| 100000 | 0.0517337 sec.  | 0.0788873 sec. | 0.113319 sec. |
+| 1000000 | 0.613458 sec. | 0.898727 sec. | 1.71067 sec. |
+| 10000000 | 9.24039 sec. | 12.1266 sec. | 23.3117 sec. |
 
 The most effective for data sorting is **vector**, **deque** is slower and **list** is the slowest
 
@@ -52,8 +48,11 @@ The most effective for data sorting is **vector**, **deque** is slower and **lis
  1. Download a [release](https://github.com/hmv47/GradeCalculator/releases)
  2. Get a C++ compiler (e.g. [GCC](https://gcc.gnu.org/)) or use an IDE such as CodeBlocks or Visual Studio
  3. Run make to compile the entire program. Prepare "kursiokai.txt" if you want to read data
- 4a. You can run make clean to delete previous build
- 4b. You can run make clean-all to clean all files including data files
+ 
+    4a. You can run make clean to delete previous build
+    
+    4b. You can run make clean-all to clean all files including data files
+    
  5. Run the file in the terminal using ./runtime (or runtime.exe if using Windows)
  6. Follow on screen instructions
 
@@ -68,3 +67,5 @@ The most effective for data sorting is **vector**, **deque** is slower and **lis
  0.4 Added student grade files generation and separation to good and bad students
  
  0.5 Added ability to choose the container
+ 
+ 0.5.1 Fixed minor file generation bug and added automated tests
