@@ -1,6 +1,8 @@
+// File header
 #pragma once
 
 #include <string>
+#include "libraries.h"
 
-std::string GetFile();
-void GradesGenerateFile (int);
+std::string InputFileName();
+void GradesGenerateFile (int, std::string&);

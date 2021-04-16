@@ -1,19 +1,6 @@
-// STD::LIST and related functions
+#include "list.h" // List lib
 
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <random>
-#include <chrono>
-#include <list>
-
-#include "list.h"
-#include "validation.h"
-#include "structure.h"
-
-void GenerateGradesList (Students* BadStudents, char FinalChoice) {
+void GenerateGradesList (StudentContainer* AllStudents, char FinalChoice) {
     using hrClock = std::chrono::high_resolution_clock;
     std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
     std::uniform_int_distribution<int> random10(1, 10);
@@ -22,20 +9,20 @@ void GenerateGradesList (Students* BadStudents, char FinalChoice) {
     std::list<int> HW;
     std::cout << "\nGenerating grades\n\n";
     do {
-        HW.push_back(random10(mt)); // Generate grade
-        std::cout << "Generated grade: " << HW.back() << "\nGenerate another (y/n) ";
+        HW.push_back(random10(mt)); // Generating random grade
+        std::cout << "Generated grade: " << HW.back() << "\nGenerate another? (y/n) ";
         std::cin >> moreGrades;
         ValidateOption(moreGrades, 'y', 'n');
-    } while (moreGrades == 'n');
+    } while (moreGrades == 'y');
 
-    int ExamGrade = random10(mt); // Generate exam grade
+    int ExamGrade = random10(mt);      // Generating exam grade
     std::cout << "Generated exam grade: " << ExamGrade << "\n";
     
-    // Get final grade
-    BadStudents->FinalGrade = FinalList(HW, ExamGrade, FinalChoice);
+   // Calculating the FinalResult grade
+    AllStudents->FinalResult = FinalList(HW, ExamGrade, FinalChoice);
 }
 
-double AverageList (std::list<int> &HW, int n) {
+double ListAverage (std::list<int> &HW, int n) {
     double sum = 0;
     auto it = HW.begin();
     for (auto it = HW.begin(); it != HW.end(); it ++)
@@ -47,122 +34,125 @@ double MedianList (std::list<int> &HW, int n) {
     double m;
     HW.sort();                      // Sort ascending
 
-    auto it1 = HW.begin();          // To get middle value
+    auto it1 = HW.begin();          // Iterators for middle value
     auto it2 = it1;
-    std::advance(it1, n / 2 - 1);   // Move iterator before the middle
-    std::advance(it2, n / 2);       // Move iterator to the middle
+    std::advance(it1, n / 2 - 1);   // Move the iterator before the middle
+    std::advance(it2, n / 2);       // Move the iterator to the middle
 
     n % 2 == 0 ? (m = 1.00 * (*it1 + *it2) / 2) : m = *it2; // Get median
     return m;
 }
 
 double FinalList (std::list<int> &HW, int ExamGrade, char type){
-    double hw;
+    double HWTotal;
     if (!HW.empty())  // If not empty
-        type == 'm' ? hw = MedianList(HW, HW.size()) : hw = AverageList(HW, HW.size());
-    else hw = 0;
-    return (0.4 * hw + 0.6 * ExamGrade);
+        type == 'm' ? HWTotal = MedianList(HW, HW.size()) : HWTotal = ListAverage(HW, HW.size());
+    else HWTotal = 0;
+    return (0.4 * HWTotal + 0.6 * ExamGrade);
 }
 
-void GetDataList (std::list<Students> &BadStudents, char DataChoice, char FinalChoice) {
-    char MoreStudents = 'n';
-    bool moreHW;
-    int tempMark;       // Temporary homework
-    std::list<int> HW; // List
-    Students tmp;     // Temporary structure
+void GetDataList (std::list<StudentContainer> &AllStudents, char DataChoice, char FinalChoice) {
+    char StudentsMore = 'n';
+    bool HWMore;
+    int HWTemp;       // Temporary grade
+    std::list<int> HW;  // Temporary structure
+    StudentContainer tmp;   // List of grades
     int ExamGrade;
     do {
-        moreHW = true;
-        HW.clear();   // Empty the list for new values
+        HWMore = true;
+        HW.clear();   // Clear
 
         std::cout << "\nStudent's full name:\n";
         std::cin >> tmp.FirstName >> tmp.LastName;
 
         if (DataChoice == 'g')
-            GenerateGradesList(&tmp, FinalChoice); // Generate homework and ExamGrade grades
+            GenerateGradesList(&tmp, FinalChoice); // Generate grades
         else {
             std::cout << "\nEnter grades, 0 after the last one:\n";
             do {
-                std::cin >> tempMark;
-                ValidateNumber(tempMark, 0, 10);
-                if (tempMark == 0)
-                    moreHW = false;             // Halt if 0
-                else HW.push_back(tempMark);      // Add grade
-            } while (moreHW);                   // While not 0
+                std::cin >> HWTemp;
+                ValidateNumber(HWTemp, 0, 10);
+                if (HWTemp == 0)
+                    HWMore = false;             // Halt if 0
+                else HW.push_back(HWTemp);      // Add the grade
+            } while (HWMore);                   // Continue
 
             std::cout << "\nExam grade:\n";
             std::cin >> ExamGrade;
             ValidateNumber(ExamGrade, 1, 10);
-            tmp.FinalGrade = FinalList(HW, ExamGrade, FinalChoice);
+            tmp.FinalResult = FinalList(HW, ExamGrade, FinalChoice);
         }
-        BadStudents.push_back(tmp);                      // Add the structure to the list of students
+        AllStudents.push_back(tmp);                       // Add to the container
 
-        std::cout << "\nAdd another student (y/n) \n";
-        std::cin >> MoreStudents;
-        ValidateOption(MoreStudents, 'y', 'n');
-    } while (MoreStudents == 'y');
+        std::cout << "\nAdd another student? (y/n) \n";
+        std::cin >> StudentsMore;
+        ValidateOption(StudentsMore, 'y', 'n');
+    } while (StudentsMore == 'y');
 }
 
-void FileReadList (std::list<Students> &BadStudents, std::string FileName, char FinalChoice) {
+void FileReadList (std::list<StudentContainer> &AllStudents, std::string FileName, char FinalChoice) {
     std::ifstream FRead (FileName);
 
     int HWNumber = 0;
     std::string header;
-    std::getline(FRead, header);            // Read first line
+    std::getline(FRead, header);            // Get first line of the file
     std::stringstream firstRow (header); // Copy to stringstream
     std::string str;
-    while (firstRow >> str)              // Count the number of strings
+    while (firstRow >> str)              // Count the strings reaches the end
         HWNumber ++;
-    HWNumber -= 3;                        // Ignore first three
+    HWNumber -= 3;                        // Ignore name, last name and grade
 
-    Students tmp;
-    int tempMark, ExamGrade;
+    StudentContainer tmp;
+    int HWTemp, ExamGrade;
     std::string row;
     std::stringstream dataRow;
     std::list<int> HW;
-    while (std::getline(FRead, row)) { // EOF
+    while (std::getline(FRead, row)) { // Continue until EOF
         dataRow.clear();
         dataRow.str(row);
         dataRow >> tmp.FirstName >> tmp.LastName;
         HW.clear();                 // Clear
         for (int i = 0; i < HWNumber; i ++) {
-            dataRow >> tempMark;
-            HW.push_back(tempMark);
+            dataRow >> HWTemp;
+            HW.push_back(HWTemp);
         }
         dataRow >> ExamGrade;
-        tmp.FinalGrade = FinalList(HW, ExamGrade, FinalChoice);
-        BadStudents.push_back(tmp);          // Push to main structure
+        tmp.FinalResult = FinalList(HW, ExamGrade, FinalChoice);
+        AllStudents.push_back(tmp);           // Push to the container
     }
 	FRead.close();
 }
 
-void GroupStudentsList (std::list<Students> &BadStudents, std::list<Students> &GoodStudents) {
-    // Sort
-    BadStudents.sort([](Students &s1, Students &s2) {return s1.FinalGrade < s2.FinalGrade;});
+void GroupStudentsList (std::list<StudentContainer> &AllStudents, std::list<StudentContainer> &GoodStudents, std::list<StudentContainer> &BadStudents, int SortStrategy) {
+     // Sort students
+    AllStudents.sort([](StudentContainer &s1, StudentContainer &s2) {return s1.FinalResult < s2.FinalResult;});
 
     // Count bad students
-    int numOfBadStudents = 0;
-    auto it = BadStudents.begin();
-    while (it->FinalGrade < 5.0 && it != BadStudents.end()) {
-            numOfBadStudents ++;
-            it ++;
+    int BadNumber = 0;
+    auto it = AllStudents.begin();
+    while (it->FinalResult < 5.0 && it != AllStudents.end()) {
+        BadNumber ++;
+        it ++;
     }
 
-    GoodStudents.assign(it, BadStudents.end());        // Copy good students
-    BadStudents.resize(numOfBadStudents);    // Shrinkk
+    GoodStudents.assign(it, AllStudents.end());               // Copy good students
+    if (SortStrategy == 1) {
+        BadStudents.assign(AllStudents.begin(), it);        // Copy bad students
+        AllStudents.clear();
+    } else AllStudents.resize(BadNumber);    // Resize the main vector
 }
 
-void SortList (std::list<Students> &BadStudents, std::list<Students> &GoodStudents, char SortChoice) {
+void ListSort (std::list<StudentContainer> &AllStudents, std::list<StudentContainer> &GoodStudents, char SortChoice) {
     if (SortChoice == 'n') {
-        BadStudents.sort([](Students &s1, Students &s2) {return s1.FirstName < s2.FirstName;});
-        GoodStudents.sort([](Students &s1, Students &s2) {return s1.FirstName < s2.FirstName;});
+        AllStudents.sort([](StudentContainer &s1, StudentContainer &s2) {return s1.FirstName < s2.FirstName;});
+        GoodStudents.sort([](StudentContainer &s1, StudentContainer &s2) {return s1.FirstName < s2.FirstName;});
     } else if (SortChoice == 'l') {
-        BadStudents.sort([](Students &s1, Students &s2) {return s1.LastName < s2.LastName;});
-        GoodStudents.sort([](Students &s1, Students &s2) {return s1.LastName < s2.LastName;});
+        AllStudents.sort([](StudentContainer &s1, StudentContainer &s2) {return s1.LastName < s2.LastName;});
+        GoodStudents.sort([](StudentContainer &s1, StudentContainer &s2) {return s1.LastName < s2.LastName;});
     }
 }
 
-void WriteFileList (std::list<Students> &BadStudents, char FinalChoice, std::string FileName) {
+void WriteFileList (std::list<StudentContainer> &AllStudents, char FinalChoice, std::string FileName) {
     std::ofstream FWrite (FileName);
     std::ostringstream row ("");
 
@@ -173,12 +163,12 @@ void WriteFileList (std::list<Students> &BadStudents, char FinalChoice, std::str
     FinalChoice == 'm' ? FWrite << "(Med.)\n" : FWrite << "(Avg.)\n";
     FWrite << "--------------------------------------------------------\n";
 
-    // Print
-    auto it = BadStudents.begin();
-    for (auto it = BadStudents.begin(); it != BadStudents.end(); it ++) {
-        row.str("");        // Empty row
+    // Print student data
+    auto it = AllStudents.begin();
+    for (auto it = AllStudents.begin(); it != AllStudents.end(); it ++) {
+        row.str("");        // Clear the stream
         row << std::setw(20) << std::left << it->FirstName << std::setw(20) << it->LastName
-            << std::fixed << std::setprecision(2) << it->FinalGrade << "\n";
+            << std::fixed << std::setprecision(2) << it->FinalResult << "\n";
         FWrite << row.str();    // Print
     }
     FWrite.close();

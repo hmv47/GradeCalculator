@@ -1,16 +1,7 @@
-// File generation and reading
-
-#include <iostream>
-#include <fstream>
-#include <chrono>
-#include <random>
-#include <sstream>
-#include <iomanip>
-
 #include "file.h"
 
-std::string GetFile () {
-    bool BadFile;
+std::string InputFileName () {
+    bool badFile;
     std::string FileName;
     std::cout << "\nEnter the file name: \n";
     std::cin >> FileName;
@@ -21,42 +12,44 @@ std::string GetFile () {
                 throw 0;
             else {
                 in.close();
-                BadFile = false;
+                badFile = false;
             }
-        } catch (int exception) {   // If doesn't exist - re-enter
-            BadFile = true;
-            std::cout << "Data file " << FileName << " Does not exist. Please try again:\n";
+        } catch (int exception) {   // Catch exception
+            badFile = true;
+            std::cout << "Data file " << FileName << " does not exist. Please try again: \n";
             std::cin.clear();
             std::cin.ignore(256,'\n');
             std::cin >> FileName;
         }
-    } while (BadFile);              // While bad file
+    } while (badFile);              // Repeat
     return FileName;
 }
 
-void GradesGenerateFile (int StudNumber) {
+void GradesGenerateFile (int StudentNumber, std::string& FileName) {
     using hrClock = std::chrono::high_resolution_clock;
     std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
     std::uniform_int_distribution<int> random10(1, 10); // 1-10
     std::uniform_int_distribution<int> random20(1, 20); // 1-20
 
-    int HWNumber = random20(mt);         // Gennerate random number of grades, can be hard-coded for testing
+        int HWNumber = random20(mt);         // HW number
+     // int HWNumber = 20;         // Pre-set number
 
-    std::ostringstream FileName;        // File name
-    FileName << "kursiokai" << StudNumber << ".txt";
-    std::ofstream add (FileName.str()); // Open
+    std::ostringstream FileNameStream;        // File name stream
+    FileNameStream << "kursiokai" << StudentNumber << ".txt";
+    FileName = FileNameStream.str();
+    std::ofstream add (FileName); // Open File
 
     // Print header text
-    std::ostringstream row ("");        // Empty row to be filled in with header data
+    std::ostringstream row ("");        // Clear
     row << std::setw(20) << std::left << "FirstName" << std::setw(21) << "LastName";
     for (int i = 1; i <= HWNumber; i ++)
-        row << "HW" << std::setw(8) << std::left << i;
-    row << "Ex.\n";
-    add << row.str();                   // Print out the row
+        row << "ND" << std::setw(8) << std::left << i;
+    row << "Egz.\n";
+    add << row.str();                   // Print
 
     // Print student data
-    for (int i = 1; i <= StudNumber; i ++) {
-        row.str("");                    // Clear and fill
+    for (int i = 1; i <= StudentNumber; i ++) {
+        row.str("");                    // Clear
         row << "FirstName" << std::setw(14) << std::left << i << "LastName" << std::setw(14) << std::left << i;
         for (int j = 0; j <= HWNumber; j ++)
             row << std::setw(10) << std::left << random10(mt);

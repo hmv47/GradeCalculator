@@ -4,39 +4,36 @@ A program written in C++ to calculate the final mark of students using the formu
 
     FinalMark = 0.4 * HomeworkMark + 0.6 * ExamMark
 
-## Speed analysis:
+## Speed analysis, grouping strategies:
 
 Testbed specs:  AMD EPYC 7502P 32C 64T @ 2.5 GHz; 512 GB DDR4 ECC; 480 GB NVMe SSD 3D XPoint in RAID 10
-
-Homework amount: 10
-
+Homework amount: 20
 Calculation method: Average
-
 Sorting type: Final mark
 
+**First strategy:** creating two new containers, the original one is deleted.
 
-**Data read:**
+**Second strategy:** creating one new container, moving the students and shrinking the original (used in earlier versions).
 
-| HW amount | vector | deque | list |
-|--|--|--|--|
-| 1000 | 0.00121062 sec. | 0.00810994 sec. | 0.00295512 sec. |
-| 10000 | 0.0111675 sec. | 0.0147009 sec. | 0.0239978 sec. |
-| 100000 | 0.101438 sec.  | 0.135723 sec. | 0.213205 sec. |
-| 1000000 | 0.989572 sec. |1.28598 sec. | 2.05806 sec. |
-| 10000000 | 9.85548 sec. | 12.5431 sec. | 20.796 sec. |
+| HW amount | 1 * vector | 2 * vector | 1 * deque | 2 * deque | 1 * list | 2 * list |
+|--|--|--|--|--|--|--|
+| 100000 |0.0544945s | 0.0546768s | 0.0820833s | 0.0768347s | 0.13402s | 0.091341s |
+| 1000000 | 0.623508s  | 0.648407s | 0.891132s | 0.855583s | 1.81378s | 0.95404s |
+| 10000000 | 8.48666s | 7.13467s | 10.2848s | 8.4427s | 24.1845s | 16.1637s |
 
-The most effective for data read is **vector**, **deque** is slower and **list** is the slowest
+The second strategy is much faster mainly seen in **deque** and **list**.
 
-**Data sorting:**
-| HW amount | vector | deque | list |
-|--|--|--|--|
-| 1000 | 0.000421655 sec. | 0.00260031 sec. | 0.000923334 sec. |
-| 10000 | 0.00454617 sec. | 0.0073013 sec. | 0.0083996 sec. |
-| 100000 | 0.0517337 sec.  | 0.0788873 sec. | 0.113319 sec. |
-| 1000000 | 0.613458 sec. | 0.898727 sec. | 1.71067 sec. |
-| 10000000 | 9.24039 sec. | 12.1266 sec. | 23.3117 sec. |
+### Speed analysis with *std::vector*
+**Normal**: using second strategy, no optimizations
+**Optimized**: sorting using *std::partition* and second strategy
 
-The most effective for data sorting is **vector**, **deque** is slower and **list** is the slowest
+| HW amount | Normal | Optimized |
+|--|--|--|
+| 10000 | 0.0546768s | 0.0103654s |
+| 1000000 | 0.648407s | 0.096699s |
+| 10000000 | 7.13467s | 0.946318s |
+
+The optimization improved the speed up to seven times, hence the optimization worked well.
 
 ## Functions:
 
@@ -46,6 +43,8 @@ The most effective for data sorting is **vector**, **deque** is slower and **lis
  - Choosing the final mark either calculated by median of homework mark or by the mean average of homework mark
  - Reading data from file
  - Choosing the std container
+ - Reading all five files for easier testing
+ - Using optimizations with std vector
 
 ## Installation and usage:
 
@@ -66,10 +65,12 @@ The most effective for data sorting is **vector**, **deque** is slower and **lis
  
  0.2 Added the ability to read data from files. From now on, only Vector version is developed.
  
- 0.3 Added exception handling and makefiles
+ 0.3 Added exception handling and makefiles.
  
- 0.4 Added student grade files generation and separation to good and bad students
+ 0.4 Added student grade files generation and separation to good and bad students.
  
- 0.5 Added ability to choose the container
+ 0.5 Added ability to choose the container.
  
- 0.5.1 Fixed minor file generation bug and added automated tests
+ 0.5.1 Fixed minor file generation bug and added automated tests.
+ 
+ 1.0.0 Final release, added optimization for vector, added two ways to sort.
