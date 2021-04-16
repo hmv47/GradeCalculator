@@ -1,121 +1,102 @@
-// STD containers
+#include "containers.h" // Containers header
 
-#include <iostream>
-#include <vector>
-#include <list>
-#include <deque>
-#include <chrono>
+void VectorContainer (char DataChoice, char FinalChoice, char SortChoice, int SortStrategy, char TimerChoice, char OptimizationChoice, std::string FileName) {
+    std::vector<StudentContainer> AllStudents, GoodStudents, BadStudents; // Containers for all students, bad students and good students
+    AllStudents.reserve(10000000);            // Safe guard to prevent memory over-allocation
+    Timer t;
 
-#include "structure.h"
-#include "validation.h"
-#include "file.h"
-#include "vector.h"
-#include "deque.h"
-#include "list.h"
-
-void VectorContainer (char DataChoice, char FinalChoice, char SortChoice) {
-    std::vector<Students> BadStudents, GoodStudents; // All students and bad students
-    BadStudents.reserve(10000000);        // To prevent over-allocation
-
-    // Timer
-    using hrClock = std::chrono::high_resolution_clock;
-    hrClock::time_point start, end;
-    std::chrono::duration<double> elapsed;
-
-    // Read data
+    // Read student data
     if (DataChoice == 'm' || DataChoice == 'g') {
-        GetDataVector(BadStudents, DataChoice, FinalChoice);
+        GetDataVector(AllStudents, DataChoice, FinalChoice);
     } else {
-        std::string FileName = GetFile();
-        start = hrClock::now();
-        FileReadVector(BadStudents, FileName, FinalChoice);
-        end = hrClock::now();
-        elapsed = end - start;
-        std::cout << "\nFile read took: " << elapsed.count() << " sec.\n";
+        if (TimerChoice == 'y') t.set();
+        FileReadVector(AllStudents, FileName, FinalChoice);
+        if (TimerChoice == 'y') std::cout << "\n" << FileName << " file read took: \t" << t.elapsed() << " sec.\n";
     }
-    BadStudents.shrink_to_fit();
+    AllStudents.shrink_to_fit();
 
-    // Group students
-    start = hrClock::now(); 
-    GroupStudentsVector(BadStudents, GoodStudents);
-    end = hrClock::now();
-    elapsed = end - start;
-    std::cout << "Student sorting took: " << elapsed.count() << " sec.\n";
+    // Dividing students into groups
+    if (TimerChoice == 'y') t.set();
+    GroupStudentsVector(AllStudents, GoodStudents, BadStudents, SortStrategy, OptimizationChoice);
+    if (TimerChoice == 'y') std::cout << "Student grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Sort
-    SortVector(BadStudents, GoodStudents, SortChoice);
+    // Sort students
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ? SortVector(BadStudents, GoodStudents, SortChoice) : SortVector(AllStudents, GoodStudents, SortChoice);
+    if (TimerChoice == 'y') std::cout << "Result grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Write results
+    // Write results to files
+    if (TimerChoice == 'y') t.set();
     WriteFileVector(GoodStudents, FinalChoice, "good.txt");
-    WriteFileVector(BadStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Good writing took: \t\t\t" << t.elapsed() << " sec. \n";
+
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ?  WriteFileVector(BadStudents, FinalChoice, "bad.txt"): WriteFileVector(AllStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Bad writing took: \t\t\t" << t.elapsed() << " sec.\n";
 }
 
-void DequeContainer (char DataChoice, char FinalChoice, char SortChoice) {
-    std::deque<Students> BadStudents, GoodStudents; // All students and bad students
+void DequeContainer (char DataChoice, char FinalChoice, char SortChoice, int SortStrategy, char TimerChoice, std::string FileName) {
+    std::deque<StudentContainer> AllStudents, GoodStudents, BadStudents; // Containers for all students, bad students and good students
+    Timer t;
 
-    // Timer
-    using hrClock = std::chrono::high_resolution_clock;
-    hrClock::time_point start, end;
-    std::chrono::duration<double> elapsed;
-
-    // Read data
+    // Read student data
     if (DataChoice == 'm' || DataChoice == 'g') {
-        GetDataDeque(BadStudents, DataChoice, FinalChoice);
+        GetDataDeque(AllStudents, DataChoice, FinalChoice);
     } else {
-        std::string FileName = GetFile();
-        start = hrClock::now();
-        FileReadDeque(BadStudents, FileName, FinalChoice);
-        end = hrClock::now();
-        elapsed = end - start;
-        std::cout << "\nFile read took: " << elapsed.count() << " sec.\n";
+        if (TimerChoice == 'y') t.set();
+        FileReadDeque(AllStudents, FileName, FinalChoice);
+        if (TimerChoice == 'y') std::cout << "\n" << FileName << " file read took: \t" << t.elapsed() << " sec.\n";
     }
 
-    // Group students
-    start = hrClock::now(); 
-    GroupStudentsDeque(BadStudents, GoodStudents);
-    end = hrClock::now();
-    elapsed = end - start;
-    std::cout << "Student sorting took: " << elapsed.count() << " sec.\n";
+    // Dividing students into groups
+    if (TimerChoice == 'y') t.set();
+    GroupStudentsDeque(AllStudents, GoodStudents, BadStudents, SortStrategy);
+    if (TimerChoice == 'y') std::cout << "Student grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Sort
-    SortDeque(BadStudents, GoodStudents, SortChoice);
+    // Sort students
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ? SortDeque(BadStudents, GoodStudents, SortChoice) : SortDeque(AllStudents, GoodStudents, SortChoice);
+    if (TimerChoice == 'y') std::cout << "Result grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Write results
+    // Write results to files
+    if (TimerChoice == 'y') t.set();
     WriteFileDeque(GoodStudents, FinalChoice, "good.txt");
-    WriteFileDeque(BadStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Good writing took: \t\t\t" << t.elapsed() << " sec. \n";
+
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ? WriteFileDeque(BadStudents, FinalChoice, "bad.txt") : WriteFileDeque(AllStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Bad writing took: \t\t\t" << t.elapsed() << " sec.\n";
 }
 
-void ListContainer (char DataChoice, char FinalChoice, char SortChoice) {
-    std::list<Students> BadStudents, GoodStudents; // All students and bad students
+void ListContainer (char DataChoice, char FinalChoice, char SortChoice, int SortStrategy, char TimerChoice, std::string FileName) {
+    std::list<StudentContainer> AllStudents, GoodStudents, BadStudents; // Containers for all students, bad students and good students
+    Timer t;
 
-    // Timer
-    using hrClock = std::chrono::high_resolution_clock;
-    hrClock::time_point start, end;
-    std::chrono::duration<double> elapsed;
-
-    // Read data
+    // Read student data
     if (DataChoice == 'm' || DataChoice == 'g') {
-        GetDataList(BadStudents, DataChoice, FinalChoice);
+        GetDataList(AllStudents, DataChoice, FinalChoice);
     } else {
-        std::string FileName = GetFile();
-        start = hrClock::now();
-        FileReadList(BadStudents, FileName, FinalChoice);
-        end = hrClock::now();
-        elapsed = end - start;
-        std::cout << "\nFile read took: " << elapsed.count() << " sec.\n";
+        if (TimerChoice == 'y') t.set();
+        FileReadList(AllStudents, FileName, FinalChoice);
+        if (TimerChoice == 'y') std::cout << "\n" << FileName << " file read took: \t" << t.elapsed() << " sec.\n";
     }
 
-    // Group students
-    start = hrClock::now(); 
-    GroupStudentsList(BadStudents, GoodStudents);
-    end = hrClock::now();
-    elapsed = end - start;
-    std::cout << "Student sorting took: " << elapsed.count() << " sec.\n";
+    // Dividing students into groups
+    if (TimerChoice == 'y') t.set();
+    GroupStudentsList(AllStudents, GoodStudents, BadStudents, SortStrategy);
+    if (TimerChoice == 'y') std::cout << "Student grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Sort
-    SortList(BadStudents, GoodStudents, SortChoice);
+    // Sort students
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ? ListSort(BadStudents, GoodStudents, SortChoice) : ListSort(AllStudents, GoodStudents, SortChoice);
+    if (TimerChoice == 'y') std::cout << "Result grouping took: \t\t\t" << t.elapsed() << " sec. \n";
 
-    // Write results
+    // Write results to files
+    if (TimerChoice == 'y') t.set();
     WriteFileList(GoodStudents, FinalChoice, "good.txt");
-    WriteFileList(BadStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Good writing took: \t\t\t" << t.elapsed() << " sec. \n";
+
+    if (TimerChoice == 'y') t.set();
+    SortStrategy == 1 ? WriteFileList(BadStudents, FinalChoice, "bad.txt") : WriteFileList(AllStudents, FinalChoice, "bad.txt");
+    if (TimerChoice == 'y') std::cout << "Bad writing took: \t\t\t" << t.elapsed() << " sec.\n";
 }

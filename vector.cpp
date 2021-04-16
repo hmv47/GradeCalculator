@@ -1,19 +1,6 @@
-// STD::VECTOR and related functions
-
-#include <iomanip>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-#include <algorithm>
-#include <random>
-#include <chrono>
-#include <vector>
-
-#include "vector.h"
-#include "structure.h"
-#include "validation.h"
-
-void GenerateGradesVector (Students* BadStudents, char FinalChoice) {
+#include "vector.h" // Vector lib
+ 
+void GenerateGradesVector (StudentContainer* AllStudents, char FinalChoice) {
     using hrClock = std::chrono::high_resolution_clock;
     std::mt19937 mt(static_cast<long unsigned int>(hrClock::now().time_since_epoch().count()));
     std::uniform_int_distribution<int> random10(1, 10);
@@ -22,17 +9,17 @@ void GenerateGradesVector (Students* BadStudents, char FinalChoice) {
     std::vector<int> HW;
     std::cout << "\nGenerating grades\n\n";
     do {
-        HW.push_back(random10(mt)); // Generate grade
-        std::cout << "Generated grade: " << HW.back() << "\nGenerate another (y/n) ";;
+        HW.push_back(random10(mt)); // Generating random grade
+        std::cout << "Generated grade: " << HW.back() << "\nGenerate another? (y/n) ";
         std::cin >> moreGrades;
         ValidateOption(moreGrades, 'y', 'n');
     } while (moreGrades == 'y');
 
-    int ExamGrade = random10(mt);        // Generate exam grade
+    int ExamGrade = random10(mt);       // Generating exam grade
     std::cout << "Generated exam grade: " << ExamGrade << "\n";
     
-    // Get final grade
-    BadStudents->FinalGrade = FinalVector(HW, ExamGrade, FinalChoice);
+   // Calculating the FinalResult grade
+    AllStudents->FinalResult = FinalVector(HW, ExamGrade, FinalChoice);
 }
 
 double AverageVector (std::vector<int> &HW, int n) {
@@ -50,115 +37,139 @@ double MedianVector (std::vector<int> &HW, int n) {
 }
 
 double FinalVector (std::vector<int> &HW, int ExamGrade, char type) {
-    double hw;
+    double HWTotal;
     if (!HW.empty())  // If not empty
-        type == 'm' ? hw = MedianVector(HW, HW.size()) : hw = AverageVector(HW, HW.size());
-    else hw = 0;
-    return (0.4 * hw + 0.6 * ExamGrade);
+        type == 'm' ? HWTotal = MedianVector(HW, HW.size()) : HWTotal = AverageVector(HW, HW.size());
+    else HWTotal = 0;
+    return (0.4 * HWTotal + 0.6 * ExamGrade);
 }
 
-void GetDataVector (std::vector<Students> &BadStudents, char DataChoice, char FinalChoice) {
-    char MoreStudents = 'n';
-    bool moreHW;
-    int tempMark;       // Temporary homework
-    Students tmp;     // Temporary structure
-    std::vector<int> HW; // Vector
+void GetDataVector (std::vector<StudentContainer> &AllStudents, char DataChoice, char FinalChoice) {
+    char StudentsMore = 'n';
+    bool HWMore;
+    int HWTemp;      // Temporary grade
+    StudentContainer tmp;     // Temporary structure
+    std::vector<int> HW; // Vector of grades
     int ExamGrade;
     do {
-        moreHW = true;
-        HW.clear();   // Clear the vector
+        HWMore = true;
+        HW.clear();   // Clear
 
         std::cout << "\nStudent's full name:\n";
         std::cin >> tmp.FirstName >> tmp.LastName;
 
         if (DataChoice == 'g')
-            GenerateGradesVector(&tmp, FinalChoice); // Generate grades and exam grade
+            GenerateGradesVector(&tmp, FinalChoice); // Generate grades
         else {
             std::cout << "\nEnter grades, 0 after the last one:\n";
             do {
-                std::cin >> tempMark;
-                ValidateNumber(tempMark, 0, 10);
-                if (tempMark == 0)
-                    moreHW = false;        // Halt if 0
-                else HW.push_back(tempMark); // Add grade
-            } while (moreHW);              // While not 0
+                std::cin >> HWTemp;
+                ValidateNumber(HWTemp, 0, 10);
+                if (HWTemp == 0)
+                    HWMore = false;        // Halt if 0
+                else HW.push_back(HWTemp);  // Add the grade
+            } while (HWMore);              // Continue
             HW.shrink_to_fit();
 
             std::cout << "\nExam grade:\n";
             std::cin >> ExamGrade;
             ValidateNumber(ExamGrade, 1, 10);
-            tmp.FinalGrade = FinalVector(HW, ExamGrade, FinalChoice);
+            tmp.FinalResult = FinalVector(HW, ExamGrade, FinalChoice);
         }
-        BadStudents.push_back(tmp);                 // Add the structure to the vector of students
+        AllStudents.push_back(tmp);                 // Add to the container
 
-        std::cout << "\nAdd another student (y/n) \n";
-        std::cin >> MoreStudents;
-        ValidateOption(MoreStudents, 'y', 'n');
-    } while (MoreStudents == 'y');
+        std::cout << "\nAdd another student? (y/n) \n";
+        std::cin >> StudentsMore;
+        ValidateOption(StudentsMore, 'y', 'n');
+    } while (StudentsMore == 'y');
 }
 
-void FileReadVector (std::vector<Students> &BadStudents, std::string FileName, char FinalChoice) {
+void FileReadVector (std::vector<StudentContainer> &AllStudents, std::string FileName, char FinalChoice) {
     std::ifstream FRead (FileName);
 
     int HWNumber = 0;
     std::string header;
-    std::getline(FRead, header);           // Read first line
+    std::getline(FRead, header);           // Get first line of the file
     std::istringstream firstRow (header);// Copy to stringstream
     std::string str;
-    while (firstRow >> str)              // Count number of strings
+    while (firstRow >> str)              // Count the strings
         HWNumber ++;
-    HWNumber -= 3;                        // Ignore first three
+    HWNumber -= 3;                       // Ignore name, last name and grade
 
-    Students tmp;
-    int tempMark, ExamGrade;
+    StudentContainer tmp;
+    int HWTemp, ExamGrade;
     std::string row;
     std::istringstream dataRow;
     std::vector<int> HW;
     HW.reserve(HWNumber);
-    while (std::getline(FRead, row)) {      // EOF
+    while (std::getline(FRead, row)) {      // Continue until EOF
         dataRow.clear();
         dataRow.str(row);
         dataRow >> tmp.FirstName >> tmp.LastName;
-        HW.clear();                      // Clear
+        HW.clear();                       // Clear
         for (int i = 0; i < HWNumber; i ++) {
-            dataRow >> tempMark;
-            HW.push_back(tempMark);
+            dataRow >> HWTemp;
+            HW.push_back(HWTemp);
         }
         dataRow >> ExamGrade;
-        tmp.FinalGrade = FinalVector(HW, ExamGrade, FinalChoice);
-        BadStudents.push_back(tmp);               // Push to main structure
+        tmp.FinalResult = FinalVector(HW, ExamGrade, FinalChoice);
+        AllStudents.push_back(tmp);               // Push to the container
     } 
     FRead.close();
 }
 
-void GroupStudentsVector (std::vector<Students> &BadStudents, std::vector<Students> &GoodStudents) {
-    // Sort
-    std::sort(BadStudents.begin(), BadStudents.end(), [](Students &s1, Students &s2) {return s1.FinalGrade < s2.FinalGrade;}); 
+void GroupStudentsVector (std::vector<StudentContainer> &AllStudents, std::vector<StudentContainer> &GoodStudents, std::vector<StudentContainer> &BadStudents, int SortStrategy, char OptimizationChoice) {
+    if (OptimizationChoice == 'y') {
+        // Pivot between good and bad students
+        auto BadNumber = std::partition (AllStudents.begin(), AllStudents.end(), [](StudentContainer &i){return (i.FinalResult < 5);});
 
-    // Count
-    int numOfBadStudents = 0;
-    while (BadStudents[numOfBadStudents].FinalGrade < 5.0 && numOfBadStudents != BadStudents.size())
-        numOfBadStudents ++;
+        // Copy good students
+        GoodStudents.reserve(AllStudents.end() - BadNumber);
+        std::copy(BadNumber, AllStudents.end(), std::back_inserter(GoodStudents));
 
-    GoodStudents.reserve(BadStudents.size() - numOfBadStudents);    // Resize
+        // Copy bad students
+        if (SortStrategy == 1) {
+            BadStudents.reserve(BadNumber - AllStudents.begin());
+            std::copy(AllStudents.begin(), BadNumber, std::back_inserter(BadStudents));
+            AllStudents.clear();
+        } else AllStudents.resize(BadNumber - AllStudents.begin()); // Resize the main vector
+    } else {
+        // Sort students
+        std::sort(AllStudents.begin(), AllStudents.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.FinalResult < s2.FinalResult;}); 
+        
+        // Get bad sutdents
+        int BadNumber = 0;
+        while (AllStudents[BadNumber].FinalResult < 5.0 && BadNumber != AllStudents.size())
+            BadNumber ++;
 
-    std::copy(BadStudents.begin() + numOfBadStudents, BadStudents.end(), std::back_inserter(GoodStudents)); // Copy good students
+        // Copy good students
+        GoodStudents.reserve(AllStudents.size() - BadNumber);
+        std::copy(AllStudents.begin() + BadNumber, AllStudents.end(), std::back_inserter(GoodStudents));
 
-    BadStudents.resize(numOfBadStudents);                 // Shrink
-    BadStudents.shrink_to_fit();
+        // Copy bad students
+        if (SortStrategy == 1) {
+            BadStudents.reserve(BadNumber);
+            std::copy(AllStudents.begin(), AllStudents.begin() + BadNumber, std::back_inserter(BadStudents));
+            AllStudents.clear();
+        } else AllStudents.resize(BadNumber); // Resize
+    }
+    AllStudents.shrink_to_fit();
 }
 
-void SortVector (std::vector<Students> &BadStudents, std::vector<Students> &GoodStudents, char SortChoice) {
+void SortVector (std::vector<StudentContainer> &S1, std::vector<StudentContainer> &S2, char SortChoice) {
     if (SortChoice == 'n') {
-        std::sort(BadStudents.begin(), BadStudents.end(), [](Students &s1, Students &s2) {return s1.FirstName < s2.FirstName;});
-        std::sort(GoodStudents.begin(), GoodStudents.end(), [](Students &s1, Students &s2) {return s1.FirstName < s2.FirstName;});
+        std::sort(S1.begin(), S1.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.FirstName < s2.FirstName;});
+        std::sort(S2.begin(), S2.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.FirstName < s2.FirstName;});
     } else if (SortChoice == 'l') {
-        std::sort(BadStudents.begin(), BadStudents.end(), [](Students &s1, Students &s2) {return s1.LastName < s2.LastName;});
-        std::sort(GoodStudents.begin(), GoodStudents.end(), [](Students &s1, Students &s2) {return s1.LastName < s2.LastName;});
+        std::sort(S1.begin(), S1.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.LastName < s2.LastName;});
+        std::sort(S2.begin(), S2.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.LastName < s2.LastName;});
+    } else {
+        std::sort(S1.begin(), S1.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.FinalResult < s2.FinalResult;});
+        std::sort(S2.begin(), S2.end(), [](StudentContainer &s1, StudentContainer &s2) {return s1.FinalResult < s2.FinalResult;});
     }
 }
 
-void WriteFileVector (std::vector<Students> &BadStudents, char FinalChoice, std::string FileName) {
+void WriteFileVector (std::vector<StudentContainer> &AllStudents, char FinalChoice, std::string FileName) {
     std::ofstream FWrite (FileName);
     std::ostringstream row ("");
 
@@ -169,11 +180,11 @@ void WriteFileVector (std::vector<Students> &BadStudents, char FinalChoice, std:
     FinalChoice == 'm' ? FWrite << "(Med.)\n" : FWrite << "(Avg.)\n";
     FWrite << "--------------------------------------------------------\n";
 
-    // Print
-    for (int i = 0; i < BadStudents.size(); i ++) {
-        row.str("");        // Empty row
-        row << std::setw(20) << std::left << BadStudents[i].FirstName << std::setw(20) << BadStudents[i].LastName
-            << std::fixed << std::setprecision(2) << BadStudents[i].FinalGrade << "\n";
+   // Print student data
+    for (int i = 0; i < AllStudents.size(); i ++) {
+        row.str("");       // Clear the stream
+        row << std::setw(20) << std::left << AllStudents[i].FirstName << std::setw(20) << AllStudents[i].LastName
+            << std::fixed << std::setprecision(2) << AllStudents[i].FinalResult << "\n";
         FWrite << row.str();    // Print
     }
     FWrite.close();

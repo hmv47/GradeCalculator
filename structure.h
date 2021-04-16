@@ -1,9 +1,10 @@
-// Structure
+// Student structure
 
 #pragma once
 
-struct Students {
-    std::string FirstName, LastName;
-    double FinalGrade;
-};
+#include <string>
 
+struct StudentContainer {
+    std::string FirstName, LastName;
+    double FinalResult;
+};
