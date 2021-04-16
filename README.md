@@ -7,9 +7,13 @@ A program written in C++ to calculate the final mark of students using the formu
 ## Speed analysis, grouping strategies:
 
 Testbed specs:  AMD EPYC 7502P 32C 64T @ 2.5 GHz; 512 GB DDR4 ECC; 480 GB NVMe SSD 3D XPoint in RAID 10
+
 Homework amount: 20
+
 Calculation method: Average
+
 Sorting type: Final mark
+
 
 **First strategy:** creating two new containers, the original one is deleted.
 
@@ -25,6 +29,7 @@ The second strategy is much faster mainly seen in **deque** and **list**.
 
 ### Speed analysis with *std::vector*
 **Normal**: using second strategy, no optimizations
+
 **Optimized**: sorting using *std::partition* and second strategy
 
 | HW amount | Normal | Optimized |
