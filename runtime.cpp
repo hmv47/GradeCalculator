@@ -33,7 +33,7 @@ int main () {
 
     // Select FinalResult grade calculation method (median or average)
     char FinalChoice;
-    std::cout << "\nPlease choose FinalResult grade type";
+    std::cout << "\nPlease choose final grade type";
     std::cout << "\nMedian:\t\tm\nAverage:\ta\n";
     std::cin >> FinalChoice;
     ValidateOption(FinalChoice, 'm', 'a');
